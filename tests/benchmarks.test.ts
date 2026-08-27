@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { buildAnalyticsResponse } from "@/lib/analytics/build-response";
 import { getYearMetadata } from "@/lib/analytics/complete-years";
 import { applyFilters } from "@/lib/analytics/filters";
 import {
@@ -53,6 +54,17 @@ describe("complete-year detection", () => {
   it("sets latestCompleteYear to 2025", () => {
     const meta = getYearMetadata(dataset.rows);
     expect(meta.latestCompleteYear).toBe(2025);
+  });
+});
+
+describe("buildAnalyticsResponse row count (used by the new narrative sections)", () => {
+  it("exposes the full dataset row count on the unfiltered response", () => {
+    const response = buildAnalyticsResponse(dataset, {
+      towns: dataset.towns,
+      flatTypes: dataset.flatTypes,
+      includePartial: false,
+    });
+    expect(response.rowCount).toBe(238_932);
   });
 });
 

@@ -9,6 +9,10 @@ import { MarketTrendChart } from "@/components/charts/market-trend-chart";
 import { MillionDollarChart } from "@/components/charts/million-dollar-chart";
 import { StoreyChart } from "@/components/charts/storey-chart";
 import { TownComparisonChart } from "@/components/charts/town-comparison-chart";
+import { BusinessApplications } from "@/components/dashboard/business-applications";
+import { BusinessContext } from "@/components/dashboard/business-context";
+import { CaseStudyConclusion } from "@/components/dashboard/case-study-conclusion";
+import { ExecutiveInsights } from "@/components/dashboard/executive-insights";
 import { FilterBar } from "@/components/dashboard/filter-bar";
 import { MarketSnapshot } from "@/components/dashboard/market-snapshot";
 import { Masthead } from "@/components/dashboard/masthead";
@@ -31,20 +35,34 @@ function readFiltersFromUrl(
 ): FilterState {
   const towns = searchParams.getAll("town").filter((t) => allTowns.includes(t));
   const flatTypes = searchParams.getAll("flatType").filter((t) => allFlatTypes.includes(t));
+  const townsEmpty = searchParams.get("townsEmpty") === "true";
+  const flatTypesEmpty = searchParams.get("flatTypesEmpty") === "true";
   return {
-    towns: towns.length > 0 ? towns : allTowns,
-    flatTypes: flatTypes.length > 0 ? flatTypes : allFlatTypes,
+    towns: townsEmpty ? [] : towns.length > 0 ? towns : allTowns,
+    flatTypes: flatTypesEmpty ? [] : flatTypes.length > 0 ? flatTypes : allFlatTypes,
     includePartial: searchParams.get("includePartial") === "true",
   };
 }
 
+// Zero `town`/`flatType` params is ambiguous by itself -- it could mean
+// "no filter, use all" (omit params entirely, below) or "explicitly
+// selected nothing." An explicit empty marker disambiguates the second
+// case rather than silently reading back as "all" on refresh/share.
 function writeFiltersToUrl(filters: FilterState, allTowns: string[], allFlatTypes: string[]): string {
   const params = new URLSearchParams();
   if (filters.towns.length !== allTowns.length) {
-    for (const t of filters.towns) params.append("town", t);
+    if (filters.towns.length === 0) {
+      params.set("townsEmpty", "true");
+    } else {
+      for (const t of filters.towns) params.append("town", t);
+    }
   }
   if (filters.flatTypes.length !== allFlatTypes.length) {
-    for (const t of filters.flatTypes) params.append("flatType", t);
+    if (filters.flatTypes.length === 0) {
+      params.set("flatTypesEmpty", "true");
+    } else {
+      for (const t of filters.flatTypes) params.append("flatType", t);
+    }
   }
   if (filters.includePartial) params.set("includePartial", "true");
   const qs = params.toString();
@@ -79,6 +97,8 @@ export function DashboardShell({ initialData, allTowns, allFlatTypes }: Dashboar
         yearlyActivity={data.empty ? [] : data.trend}
       />
 
+      <BusinessContext />
+
       <FilterBar
         allTowns={allTowns}
         allFlatTypes={allFlatTypes}
@@ -108,6 +128,8 @@ export function DashboardShell({ initialData, allTowns, allFlatTypes }: Dashboar
         ) : (
           <>
             <MarketSnapshot kpi={data.kpi} />
+
+            <ExecutiveInsights data={initialData} />
 
             <Section
               id="trend"
@@ -179,6 +201,8 @@ export function DashboardShell({ initialData, allTowns, allFlatTypes }: Dashboar
           </>
         )}
 
+        <BusinessApplications />
+        <CaseStudyConclusion data={initialData} />
         <Methodology />
       </main>
     </>

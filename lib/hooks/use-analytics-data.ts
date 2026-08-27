@@ -9,11 +9,24 @@ function buildQuery(filters: FilterState, allTowns: string[], allFlatTypes: stri
   const allTownsSelected = filters.towns.length === allTowns.length;
   const allTypesSelected = filters.flatTypes.length === allFlatTypes.length;
 
+  // Zero `town` params is ambiguous on its own -- it could mean "no
+  // filter, use all towns" (the omit-params-entirely case below) or
+  // "the user explicitly selected nothing." An explicit empty marker
+  // disambiguates the second case instead of silently falling back to
+  // "all towns" server-side.
   if (!allTownsSelected) {
-    for (const t of filters.towns) params.append("town", t);
+    if (filters.towns.length === 0) {
+      params.set("townsEmpty", "true");
+    } else {
+      for (const t of filters.towns) params.append("town", t);
+    }
   }
   if (!allTypesSelected) {
-    for (const t of filters.flatTypes) params.append("flatType", t);
+    if (filters.flatTypes.length === 0) {
+      params.set("flatTypesEmpty", "true");
+    } else {
+      for (const t of filters.flatTypes) params.append("flatType", t);
+    }
   }
   if (filters.includePartial) params.set("includePartial", "true");
 

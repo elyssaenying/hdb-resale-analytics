@@ -29,6 +29,10 @@ export type AnalyticsResponse =
       towns: string[];
       flatTypes: string[];
       yearMeta: YearMetadata;
+      /** Total rows in the underlying dataset, independent of any filter
+       * -- used for narrative copy (e.g. "238,932 transactions"), not a
+       * new analytical computation, just an existing count exposed. */
+      rowCount: number;
       empty: true;
       reason: "no-towns" | "no-flat-types" | "no-rows";
     }
@@ -36,6 +40,7 @@ export type AnalyticsResponse =
       towns: string[];
       flatTypes: string[];
       yearMeta: YearMetadata;
+      rowCount: number;
       empty: false;
       kpi: KpiSnapshot;
       trend: YearlyTrendPoint[];
@@ -57,18 +62,19 @@ export type AnalyticsResponse =
  */
 export function buildAnalyticsResponse(dataset: Dataset, filters: FilterState): AnalyticsResponse {
   const yearMeta = getYearMetadata(dataset.rows);
+  const rowCount = dataset.rows.length;
 
   if (filters.towns.length === 0) {
-    return { towns: dataset.towns, flatTypes: dataset.flatTypes, yearMeta, empty: true, reason: "no-towns" };
+    return { towns: dataset.towns, flatTypes: dataset.flatTypes, yearMeta, rowCount, empty: true, reason: "no-towns" };
   }
   if (filters.flatTypes.length === 0) {
-    return { towns: dataset.towns, flatTypes: dataset.flatTypes, yearMeta, empty: true, reason: "no-flat-types" };
+    return { towns: dataset.towns, flatTypes: dataset.flatTypes, yearMeta, rowCount, empty: true, reason: "no-flat-types" };
   }
 
   const { trendBase, analysisRows } = applyFilters(dataset.rows, filters, yearMeta.completeYears);
 
   if (analysisRows.length === 0) {
-    return { towns: dataset.towns, flatTypes: dataset.flatTypes, yearMeta, empty: true, reason: "no-rows" };
+    return { towns: dataset.towns, flatTypes: dataset.flatTypes, yearMeta, rowCount, empty: true, reason: "no-rows" };
   }
 
   const leaseSelection = resolveLeaseFlatTypes(filters.flatTypes);
@@ -77,6 +83,7 @@ export function buildAnalyticsResponse(dataset: Dataset, filters: FilterState): 
     towns: dataset.towns,
     flatTypes: dataset.flatTypes,
     yearMeta,
+    rowCount,
     empty: false,
     kpi: computeKpiSnapshot(trendBase, yearMeta.latestCompleteYear),
     trend: computeYearlyTrend(analysisRows, yearMeta.completeYears),

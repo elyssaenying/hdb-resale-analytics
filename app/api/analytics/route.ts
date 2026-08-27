@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildAnalyticsResponse } from "@/lib/analytics/build-response";
-import type { FilterState } from "@/lib/analytics/types";
+import { parseFilters } from "@/lib/analytics/parse-filters";
 import { loadDataset } from "@/lib/data/loader";
 
 export const dynamic = "force-dynamic";
-
-function parseFilters(searchParams: URLSearchParams, allTowns: string[], allFlatTypes: string[]): FilterState {
-  const townsParam = searchParams.getAll("town");
-  const flatTypesParam = searchParams.getAll("flatType");
-  const includePartial = searchParams.get("includePartial") === "true";
-
-  return {
-    towns: townsParam.length > 0 ? townsParam.filter((t) => allTowns.includes(t)) : allTowns,
-    flatTypes: flatTypesParam.length > 0 ? flatTypesParam.filter((t) => allFlatTypes.includes(t)) : allFlatTypes,
-    includePartial,
-  };
-}
 
 export async function GET(request: NextRequest) {
   let dataset;

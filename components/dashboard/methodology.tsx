@@ -1,6 +1,6 @@
 "use client";
 
-import { methodologyReferences } from "@/lib/config";
+import { datasetLimitations, futureExtensions, methodologyReferences } from "@/lib/config";
 
 const NOTES = [
   "Source: official data.gov.sg HDB resale flat prices dataset (2017 onward), acquired via the data.gov.sg API.",
@@ -21,14 +21,42 @@ export function Methodology() {
         Methodology &amp; Data Notes
       </h2>
       <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_260px]">
-        <ul className="space-y-2.5 text-sm leading-relaxed text-ink-muted">
-          {NOTES.map((note) => (
-            <li key={note} className="flex gap-2.5">
-              <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-ink-muted" />
-              <span>{note}</span>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <ul className="space-y-2.5 text-sm leading-relaxed text-ink-muted">
+            {NOTES.map((note) => (
+              <li key={note} className="flex gap-2.5">
+                <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-ink-muted" />
+                <span>{note}</span>
+              </li>
+            ))}
+          </ul>
+
+          <h3 className="mt-6 text-sm font-semibold text-ink">What this dataset cannot tell you</h3>
+          <p className="mt-1.5 text-sm text-ink-muted">
+            The transaction records do not include:
+          </p>
+          <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+            {datasetLimitations.map((item) => (
+              <li key={item} className="flex gap-2.5 text-sm text-ink-muted">
+                <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-sm text-ink-muted">
+            As a result, this analysis can describe <em>what</em> happened in the resale market, but cannot on
+            its own explain <em>why</em>, measure affordability, or substitute for professional valuation or
+            financial advice.
+          </p>
+
+          <h3 className="mt-6 text-sm font-semibold text-ink">Possible future extensions</h3>
+          <p className="mt-1.5 text-sm text-ink-muted">
+            {futureExtensions.join(", ")}. Each would require additional data and, in most cases, additional
+            methodology beyond what is implemented here — none of this is claimed to be necessary to make the
+            current analysis complete.
+          </p>
+        </div>
+
         <div className="h-fit rounded-md border border-border bg-surface p-4">
           <p className="font-mono text-[11px] uppercase tracking-wide text-ink-muted">References</p>
           <ul className="mt-2 space-y-1.5">
